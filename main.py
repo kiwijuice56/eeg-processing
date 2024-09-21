@@ -1,5 +1,6 @@
 import numpy as np
-import scipy
+from scipy import signal
+import yasa
 
 import matplotlib.pyplot as plt
 
@@ -39,12 +40,22 @@ raw_alpha_value = np.array(raw_data["alpha_absolute"]["value"])
 raw_eeg_time = np.array(raw_data["eeg"]["time"])
 raw_eeg_value = np.array(raw_data["eeg"]["value"])
 
+print(len(raw_eeg_value))
+print(len(raw_alpha_value))
+
 # Interpolate data with consistent spacing between samples
 # (Channel 1 is left forehead)
 raw_eeg_time, raw_eeg_value = interpolate_signal(raw_eeg_time, raw_eeg_value[:, 1])
 raw_alpha_time, raw_alpha_value = interpolate_signal(raw_alpha_time, raw_alpha_value[:, 1])
 
-# scipy.signal.welch(raw_eeg_time, raw_eeg_value, )
+# https://docs.scipy.org/doc/scipy/reference/generated/scipy.signal.welch.html
+# https://github.com/HPI-CH/UNIVERSE/blob/main/Features/features.py
+freqs, psd = signal.welch(x=raw_eeg_value, fs=256.0, window="hann")
+
+bandpower = yasa.bandpower_from_psd_ndarray(psd, freqs) # Calculate the bandpower on 3-D PSD array
+bandpower = np.transpose(bandpower, (1, 2, 0))
+
+print(bandpower)
 
 plt.plot(raw_alpha_time, raw_alpha_value)
 
