@@ -1,2 +1,5 @@
+# Data and binary files
 *.json
+*.npy
+
 .venv/
