@@ -1,11 +1,10 @@
 import numpy as np
-import scipy
 
 import matplotlib.pyplot as plt
 
-
 # Calculates bandpower of different frequencies in EEG data
 
+# Experimental, based on sparse Muse documentation
 def bandpower(data, sampling_freq, band):
     fft = np.fft.fft(data)
     psd = np.square(np.abs(fft))
