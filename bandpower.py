@@ -25,8 +25,8 @@ raw_eeg_value = np.fromfile("data/raw_eeg_value.npy")
 # https://web.archive.org/web/20181105231756/http://developer.choosemuse.com/tools/available-data#Absolute_Band_Powers
 # https://mind-monitor.com/forums/viewtopic.php?t=1651
 
-window_size = 256
-window_gap = 26
+window_size = 1024
+window_gap = 128
 
 test_alpha_time = []
 test_alpha_value = []
@@ -35,7 +35,7 @@ for i in range(window_size, len(raw_eeg_time), window_gap):
     window_value = raw_eeg_value[i - window_size : i]
 
     test_alpha_time.append(raw_eeg_time[i])
-    test_alpha_value.append(bandpower(window_value, 256.0, [7.5, 13.0]))
+    test_alpha_value.append(bandpower(window_value, 1024.0, [7.5, 13.0]))
 
 test_alpha_value = (test_alpha_value - min(test_alpha_value)) / (max(test_alpha_value) - min(test_alpha_value))
 
