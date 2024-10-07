@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 
 # Experimental, based on sparse Muse documentation
 def bandpower(data, sampling_freq, band):
-    fft = np.fft.fft(data)
+    fft = np.fft.fft(data,)
     psd = np.square(np.abs(fft))
     bandpower = 0
     for i in range(len(psd)):
