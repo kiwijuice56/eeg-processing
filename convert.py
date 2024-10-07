@@ -18,8 +18,8 @@ def interpolate_signal(x, y):
     new_y = np.interp(new_x, x, y)
 
     # Convert to seconds and set start to 0
-    #new_x *= 10 ** -6
-    #new_x -= new_x[0]
+    new_x *= 10 ** -6
+    new_x -= new_x[0]
 
     return new_x, new_y
 
@@ -41,23 +41,48 @@ raw_alpha_value = np.array(raw_data["alpha_absolute"]["value"])
 raw_eeg_time = np.array(raw_data["eeg"]["time"])
 raw_eeg_value = np.array(raw_data["eeg"]["value"])
 
-plt.plot(raw_eeg_time.copy(), raw_eeg_value[:,1].copy())
+raw_averaged_eeg_value = []
+raw_averaged_eeg_time = []
+
+# MuseS samples in "bursts," measuring the EEG 12 times within ~5000 microseconds intervals,
+# then waiting a long period to repeat. Here, we take the average of the samples for one clean signal.
+maximum_sample_wait = 5000
+minimum_time = raw_eeg_time[0]
+i = 0
+while i < len(raw_eeg_value):
+    sample_value = []
+    sample_time = []
+    j = i
+    while j < len(raw_eeg_value):
+        if raw_eeg_time[j] - raw_eeg_time[i] < maximum_sample_wait:
+            # (Channel 1 is left forehead)
+            sample_value.append(raw_eeg_value[j][1])
+            sample_time.append(raw_eeg_time[j])
+        else:
+            break
+        j = j + 1
+    i = j
+    raw_averaged_eeg_value.append(sum(sample_value) / len(sample_value))
+    # Although we already normalize the time later, subtracting the minimum time here prevents integer overflows
+    raw_averaged_eeg_time.append(sum([time - minimum_time for time in sample_time]) // len(sample_time))
+
+raw_averaged_eeg_value = np.array(raw_averaged_eeg_value)
+raw_averaged_eeg_time = np.array(raw_averaged_eeg_time)
 
 # Interpolate data with consistent spacing between samples
-# (Channel 1 is left forehead)
-raw_eeg_time, raw_eeg_value = interpolate_signal(raw_eeg_time, raw_eeg_value[:, 1])
+raw_averaged_eeg_time, raw_averaged_eeg_value = interpolate_signal(raw_averaged_eeg_time, raw_averaged_eeg_value)
 raw_alpha_time, raw_alpha_value = interpolate_signal(raw_alpha_time, raw_alpha_value[:, 1])
 
-# Center both signals
-raw_eeg_value -= np.median(raw_eeg_value)
-raw_alpha_value -= np.median(raw_alpha_value)
+# Center the signals around y = 0
+# raw_averaged_eeg_value -= np.median(raw_averaged_eeg_value)
+# raw_alpha_value -= np.median(raw_alpha_value)
 
-plt.plot(raw_eeg_time, raw_eeg_value)
+plt.plot(raw_averaged_eeg_time, raw_averaged_eeg_value)
 
-# Save interpolated signals
+# # Save interpolated signals
 raw_alpha_time.tofile("data/raw_alpha_time.npy")
 raw_alpha_value.tofile("data/raw_alpha_value.npy")
-raw_eeg_time.tofile("data/raw_eeg_time.npy")
-raw_eeg_value.tofile("data/raw_eeg_value.npy")
+raw_averaged_eeg_time.tofile("data/raw_eeg_time.npy")
+raw_averaged_eeg_value.tofile("data/raw_eeg_value.npy")
 
 plt.show()
