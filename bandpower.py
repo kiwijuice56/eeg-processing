@@ -5,6 +5,10 @@ import matplotlib.pyplot as plt
 # Calculates bandpower of different frequencies in EEG data
 
 # Experimental, based on sparse Muse documentation
+# https://docs.scipy.org/doc/scipy/reference/generated/scipy.signal.welch.html
+# https://github.com/HPI-CH/UNIVERSE/blob/main/Features/features.py
+# https://web.archive.org/web/20181105231756/http://developer.choosemuse.com/tools/available-data#Absolute_Band_Powers
+# https://mind-monitor.com/forums/viewtopic.php?t=1651
 def bandpower(data, sampling_freq, band):
     fft = np.fft.fft(data,)
     psd = np.square(np.abs(fft))
@@ -20,11 +24,6 @@ raw_alpha_value = np.fromfile("data/raw_alpha_value.npy")
 raw_eeg_time = np.fromfile("data/raw_eeg_time.npy")
 eeg_value = np.fromfile("data/filtered_eeg_value.npy")
 
-# https://docs.scipy.org/doc/scipy/reference/generated/scipy.signal.welch.html
-# https://github.com/HPI-CH/UNIVERSE/blob/main/Features/features.py
-# https://web.archive.org/web/20181105231756/http://developer.choosemuse.com/tools/available-data#Absolute_Band_Powers
-# https://mind-monitor.com/forums/viewtopic.php?t=1651
-
 window_size = 2048
 window_gap = 256
 
@@ -39,9 +38,6 @@ for i in range(window_size, len(raw_eeg_time), window_gap):
 
 test_alpha_value = (test_alpha_value - min(test_alpha_value)) / (max(test_alpha_value) - min(test_alpha_value))
 
-# This is slightly incorrect; the interpolated alpha signals start at t = 0,
-# but they actually have a short delay before Muse sends any packets.
-# In any case, this is still useful to see if the overall pattern is the same
 plt.plot(raw_alpha_time, raw_alpha_value)
 plt.plot(test_alpha_time, test_alpha_value)
 plt.show()

@@ -1,22 +1,23 @@
 import numpy as np
 
-import matplotlib.pyplot as plt
-
 import json
 import re
+
+import matplotlib.pyplot as plt
 
 
 # Converts raw JSON data from the Muse recorder into a binary format, normalized
 # to seconds instead of microseconds
 
 
-def interpolate_signal(x, y, original_sampling_freq=-1, new_sampling_freq=-1):
-    new_sample_count = int(new_sampling_freq / original_sampling_freq * len(y))
+def interpolate_signal(x, y, old_frequency=-1, new_frequency=-1):
+    new_sample_count = int(new_frequency / old_frequency * len(y))
 
-    if original_sampling_freq < 0:
+    if old_frequency < 0:
         new_sample_count = len(y)
 
-    # The timestamps themselves are worthless (except for the end points)
+    # The timestamps themselves are worthless (except for the end points)...
+    # They only reflect the time the Bluetooth packet was sent/received
     old_x = np.linspace(x[0], x[-1], num=len(y))
     new_x = np.linspace(x[0], x[-1], num=new_sample_count)
     new_y = np.interp(new_x, old_x, y)
@@ -28,31 +29,33 @@ def interpolate_signal(x, y, original_sampling_freq=-1, new_sampling_freq=-1):
     return new_x, new_y
 
 
-# Open raw Muse data from JSON file, recorded using GD Muse
-raw_data = {}
-with open("data/test_eeg_and_psd5.json") as f:
-    raw_json_data = str(f.readline())
+def eeg_from_json_to_npy(file_name, new_file_name, signal_name, channel=1, old_frequency=-1, new_frequency=-1, plot=False):
+    # Open raw Muse data from JSON file, recorded using GD Muse
+    raw_data = {}
+    with open(file_name) as f:
+        raw_json_data = str(f.readline())
 
-    # Python's json module crashes if the file contains 'nan' rather than 'NaN'
-    raw_json_data = re.sub(r'\bnan\b', 'NaN', raw_json_data)
+        # Python's json module crashes if the file contains 'nan' rather than 'NaN'
+        raw_json_data = re.sub(r'\bnan\b', 'NaN', raw_json_data)
 
-    raw_data = json.loads(raw_json_data)
+        raw_data = json.loads(raw_json_data)
 
-# Convert data into more usable form
-raw_alpha_time = np.array(raw_data["alpha_absolute"]["time"])
-raw_alpha_value = np.array(raw_data["alpha_absolute"]["value"])
-raw_eeg_time = np.array(raw_data["eeg"]["time"])
-raw_eeg_value = np.array(raw_data["eeg"]["value"]) # Forehead channel
+    # Convert data into more usable form
+    raw_time = np.array(raw_data[signal_name]["time"])
+    raw_value = np.array(raw_data[signal_name]["value"])[:, channel]
 
-# Interpolate data with consistent spacing between samples
-raw_eeg_time, raw_eeg_value = interpolate_signal(raw_eeg_time, raw_eeg_value[:,1], original_sampling_freq=256, new_sampling_freq=1024)
-raw_alpha_time, raw_alpha_value = interpolate_signal(raw_alpha_time, raw_alpha_value[:, 1])
+    # Interpolate data with consistent spacing between samples
+    interp_raw_time, interp_raw_value = interpolate_signal(raw_time, raw_value, old_frequency=old_frequency, new_frequency=new_frequency)
 
-# Save interpolated signals
-raw_alpha_time.tofile("data/raw_alpha_time.npy")
-raw_alpha_value.tofile("data/raw_alpha_value.npy")
-raw_eeg_time.tofile("data/raw_eeg_time.npy")
-raw_eeg_value.tofile("data/raw_eeg_value.npy")
+    # Save interpolated signals
+    interp_raw_time.tofile(new_file_name % "time")
+    interp_raw_value.tofile(new_file_name % "value")
 
-plt.plot(raw_eeg_time[:1024], raw_eeg_value[:1024])
+    if plot:
+        plt.plot(interp_raw_time, interp_raw_value)
+
+
+eeg_from_json_to_npy("data/test_eeg_and_psd.json", "data/raw_alpha_%s.npy", "alpha_absolute", channel=1, plot=True)
+eeg_from_json_to_npy("data/test_eeg_and_psd.json", "data/raw_eeg_%s.npy", "eeg", channel=1, old_frequency=256, new_frequency=1024, plot=True)
+
 plt.show()
