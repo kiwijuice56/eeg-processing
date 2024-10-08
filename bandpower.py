@@ -22,7 +22,7 @@ def calculate_bandpower(data, sampling_frequency, band):
 
 
 # Uses a window to calculate the bandpower of an EEG signal over time
-def calculate_bandpower_signal(eeg_time, eeg_value, band, sampling_frequency, window_size=2048, window_gap=256, plot=True):
+def calculate_bandpower_signal(eeg_time, eeg_value, band, sampling_frequency, window_size=2048, window_gap=512, plot=True):
     signal_time = []
     signal_value = []
 
@@ -41,20 +41,20 @@ def calculate_bandpower_signal(eeg_time, eeg_value, band, sampling_frequency, wi
     return np.array(signal_time), np.array(signal_value)
 
 
-raw_alpha_time = np.fromfile("data/raw_alpha_time.npy")
-raw_alpha_value = np.fromfile("data/raw_alpha_value.npy")
-raw_eeg_time = np.fromfile("data/raw_eeg_time.npy")
-filtered_eeg_value = np.fromfile("data/filtered_eeg_value.npy")
+raw_alpha_time = np.fromfile("data/alpha_2_time.npy")
+raw_alpha_value = np.fromfile("data/alpha_2_value.npy")
+raw_eeg_time = np.fromfile("data/eeg_2_time.npy")
+filtered_eeg_value = np.fromfile("data/filtered_eeg_2_value.npy")
 
 # Muse's built-in values
+raw_alpha_value -= min(raw_alpha_value)
+raw_alpha_value /= max(raw_alpha_value)
 plt.plot(raw_alpha_time, raw_alpha_value)
 
-# calculate_bandpower_signal(raw_eeg_time, filtered_eeg_value, [1.0, 4.0], 1024.0) # Delta
-# calculate_bandpower_signal(raw_eeg_time, filtered_eeg_value, [4.0, 8.0], 1024.0) # Theta
 calculate_bandpower_signal(raw_eeg_time, filtered_eeg_value, [8.0, 13.0], 1024.0) # Alpha
 # calculate_bandpower_signal(raw_eeg_time, filtered_eeg_value, [13.0, 30.0], 1024.0) # Beta
+# calculate_bandpower_signal(raw_eeg_time, filtered_eeg_value, [1.0, 4.0], 1024.0) # Delta
+# calculate_bandpower_signal(raw_eeg_time, filtered_eeg_value, [4.0, 8.0], 1024.0) # Theta
 # calculate_bandpower_signal(raw_eeg_time, filtered_eeg_value, [30.0, 44.0], 1024.0) # Gamma
-
-
 
 plt.show()

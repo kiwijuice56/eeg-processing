@@ -55,7 +55,13 @@ def eeg_from_json_to_npy(file_name, new_file_name, signal_name, channel=1, old_f
         plt.plot(interp_raw_time, interp_raw_value)
 
 
-eeg_from_json_to_npy("data/test_eeg_and_psd.json", "data/raw_alpha_%s.npy", "alpha_absolute", channel=1, plot=True)
-eeg_from_json_to_npy("data/test_eeg_and_psd.json", "data/raw_eeg_%s.npy", "eeg", channel=1, old_frequency=256, new_frequency=1024, plot=True)
+eeg_from_json_to_npy("data/test_eeg_and_full_psd.json", "data/alpha_2_%s.npy", "alpha_absolute", channel=1, plot=True)
+eeg_from_json_to_npy("data/test_eeg_and_full_psd.json", "data/beta_2_%s.npy", "beta_absolute", channel=1, plot=True)
+eeg_from_json_to_npy("data/test_eeg_and_full_psd.json", "data/gamma_2_%s.npy", "gamma_absolute", channel=1, plot=True)
+eeg_from_json_to_npy("data/test_eeg_and_full_psd.json", "data/theta_2_%s.npy", "theta_absolute", channel=1, plot=True)
+eeg_from_json_to_npy("data/test_eeg_and_full_psd.json", "data/delta_2_%s.npy", "delta_absolute", channel=1, plot=True)
+
+eeg_from_json_to_npy("data/test_eeg_and_full_psd.json", "data/eeg_2_%s.npy", "eeg", channel=1, old_frequency=256, new_frequency=1024, plot=True)
+
 
 plt.show()
