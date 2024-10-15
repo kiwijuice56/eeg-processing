@@ -2,22 +2,39 @@ import numpy as np
 
 import matplotlib.pyplot as plt
 
+
 # Calculates bandpower of different frequencies in EEG data
+
+
+def get_fft_window(data, sampling_frequency, band):
+    fft = np.fft.fft(data)
+    fft_window_freq = []
+    fft_window_val = []
+
+    for i in range(len(fft)):
+        freq = i * sampling_frequency / len(fft)
+        if band[0] <= freq <= band[1]:
+            fft_window_freq.append(freq)
+            fft_window_val.append(np.abs(fft[i]))
+
+    return fft_window_freq, fft_window_val
+
 
 # Experimental, based on sparse Muse documentation:
 # Calculates the bandpower of a window of the EEG signal
-# https://docs.scipy.org/doc/scipy/reference/generated/scipy.signal.welch.html
-# https://github.com/HPI-CH/UNIVERSE/blob/main/Features/features.py
-# https://web.archive.org/web/20181105231756/http://developer.choosemuse.com/tools/available-data#Absolute_Band_Powers
-# https://mind-monitor.com/forums/viewtopic.php?t=1651
-def calculate_bandpower(data, sampling_frequency, band):
+def calculate_bandpower(data, sampling_frequency, band, plot=False):
     fft = np.fft.fft(data)
     psd = np.square(np.abs(fft))
     bandpower = 0
+
     for i in range(len(psd)):
         freq = i * sampling_frequency / len(psd)
         if band[0] <= freq <= band[1]:
             bandpower += psd[i]
+
+    if plot:
+        plt.plot(fft)
+
     return np.log(bandpower)
 
 
@@ -26,7 +43,7 @@ def calculate_bandpower_signal(eeg_time, eeg_value, band, sampling_frequency, wi
     signal_time = []
     signal_value = []
 
-    for i in range(window_size, len(raw_eeg_time), window_gap):
+    for i in range(window_size, len(eeg_time), window_gap):
         window_value = eeg_value[i - window_size : i]
 
         signal_time.append(eeg_time[i])
@@ -41,20 +58,35 @@ def calculate_bandpower_signal(eeg_time, eeg_value, band, sampling_frequency, wi
     return np.array(signal_time), np.array(signal_value)
 
 
-raw_alpha_time = np.fromfile("data/alpha_2_time.npy")
-raw_alpha_value = np.fromfile("data/alpha_2_value.npy")
-raw_eeg_time = np.fromfile("data/eeg_2_time.npy")
-filtered_eeg_value = np.fromfile("data/filtered_eeg_2_value.npy")
+def test_a():
+    raw_alpha_time = np.fromfile("data/beta_2_time.npy")
+    raw_alpha_value = np.fromfile("data/beta_2_value.npy")
+    raw_eeg_time = np.fromfile("data/eeg_2_time.npy")
+    filtered_eeg_value = np.fromfile("data/filtered_eeg_2_value.npy")
 
-# Muse's built-in values
-raw_alpha_value -= min(raw_alpha_value)
-raw_alpha_value /= max(raw_alpha_value)
-plt.plot(raw_alpha_time, raw_alpha_value)
+    # Normalize built-in values
+    raw_alpha_value -= min(raw_alpha_value)
+    raw_alpha_value /= max(raw_alpha_value)
 
-calculate_bandpower_signal(raw_eeg_time, filtered_eeg_value, [8.0, 13.0], 1024.0) # Alpha
-# calculate_bandpower_signal(raw_eeg_time, filtered_eeg_value, [13.0, 30.0], 1024.0) # Beta
-# calculate_bandpower_signal(raw_eeg_time, filtered_eeg_value, [1.0, 4.0], 1024.0) # Delta
-# calculate_bandpower_signal(raw_eeg_time, filtered_eeg_value, [4.0, 8.0], 1024.0) # Theta
-# calculate_bandpower_signal(raw_eeg_time, filtered_eeg_value, [30.0, 44.0], 1024.0) # Gamma
+    plt.plot(raw_alpha_time, raw_alpha_value)
 
-plt.show()
+    # calculate_bandpower_signal(raw_eeg_time, filtered_eeg_value, [7.5, 13.0], 1024.0)       # Alpha
+    calculate_bandpower_signal(raw_eeg_time, filtered_eeg_value, [13.0, 30.0], 1024.0)    # Beta
+    # calculate_bandpower_signal(raw_eeg_time, filtered_eeg_value, [1.0, 4.0], 1024.0)      # Delta
+    # calculate_bandpower_signal(raw_eeg_time, filtered_eeg_value, [4.0, 8.0], 1024.0)      # Theta
+    # calculate_bandpower_signal(raw_eeg_time, filtered_eeg_value, [30.0, 44.0], 1024.0)    # Gamma
+
+    plt.show()
+
+
+def test_b():
+    filtered_eeg_value = np.fromfile("data/filtered_eeg_2_value.npy")
+
+    fft_window_freq, fft_window_val = get_fft_window(filtered_eeg_value, 1024.0, band=[0.1, 70.0])
+
+    plt.plot(fft_window_freq, fft_window_val)
+
+    plt.show()
+
+
+test_a()
