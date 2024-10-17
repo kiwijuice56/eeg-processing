@@ -16,9 +16,37 @@ def get_psd_window(data, sampling_frequency, band):
         freq = i * sampling_frequency / len(fft)
         if band[0] <= freq <= band[1]:
             psd_window_freq.append(freq)
-            psd_window_val.append(np.abs(psd[i]))
+            psd_window_val.append(psd[i])
 
     return psd_window_freq, psd_window_val
+
+
+def get_averaged_psd_window(eeg_time, eeg_value, sampling_frequency, band, window_size=2048, window_gap=512):
+    averaged_psd_val = []
+    averaged_psd_freq = []
+
+    hanning_window = np.hanning(window_size)
+
+    # Roll a window across the signal
+    window_count = 0
+    for i in range(window_size, len(eeg_time), window_gap):
+        window_value = eeg_value[i - window_size : i]
+
+        # Taper the ends of each window
+        window_value = [x * y for x, y in zip(window_value, hanning_window)]
+
+        # Find the PSD estimation for this window
+        averaged_psd_freq, psd_val = get_psd_window(window_value, sampling_frequency, band)
+
+        # Sum the windows up
+        if not averaged_psd_val:
+            averaged_psd_val = psd_val
+        else:
+            averaged_psd_val = [x + y for x, y in zip(averaged_psd_val, psd_val)]
+
+        window_count += 1
+
+    return averaged_psd_freq, [x / window_count for x in averaged_psd_val]
 
 
 def get_fft_window(data, sampling_frequency, band):
@@ -73,6 +101,7 @@ def calculate_bandpower_signal(eeg_time, eeg_value, band, sampling_frequency, wi
     return np.array(signal_time), np.array(signal_value)
 
 
+# Compare a signal's Muse-calculated band-power signals and compare them to those calculated by this script
 def test_a():
     raw_muse_time = np.fromfile("data/beta_2_time.npy")
     raw_muse_value = np.fromfile("data/beta_2_value.npy")
@@ -94,28 +123,31 @@ def test_a():
     plt.show()
 
 
+# Get the full PSD of two signals to compare
 def test_b():
-    filtered_eeg_value = np.fromfile("data/filtered_binaural_theta_test_1_eeg_value.npy")
-
-    psd_window_freq, psd_window_val = get_psd_window(filtered_eeg_value, 1024.0, band=[0.1, 50.0])
-
-    plt.plot(psd_window_freq, psd_window_val, label="binaural_theta_fft")
-
-    plt.legend()
-    plt.show()
-
-
-def test_c():
     filtered_eeg_value = np.fromfile("data/filtered_pink_noise_test_1_eeg_value.npy")
-    fft_window_freq, fft_window_val = get_psd_window(filtered_eeg_value, 1024.0, band=[2, 10])
-    plt.plot(fft_window_freq, fft_window_val, label="pink_noise_psd")
+    psd_window_freq, psd_window_val = get_psd_window(filtered_eeg_value, 1024.0, band=[2, 10])
+    plt.plot(psd_window_freq, psd_window_val, label="pink_noise_psd")
 
     filtered_eeg_value = np.fromfile("data/filtered_binaural_theta_test_1_eeg_value.npy")
-    fft_window_freq, fft_window_val = get_psd_window(filtered_eeg_value, 1024.0, band=[2, 10])
-    plt.plot(fft_window_freq, fft_window_val, label="binaural_theta_psd")
+    psd_window_freq, psd_window_val = get_psd_window(filtered_eeg_value, 1024.0, band=[2, 10])
+    plt.plot(psd_window_freq, psd_window_val, label="binaural_theta_psd")
 
     plt.legend()
     plt.show()
 
+
+# Calculate the PSD for windows in time, averaging them up
+def test_c():
+    for signal in ["pink_noise_test_1", "binaural_theta_test_1"]:
+        filtered_eeg_time = np.fromfile("data/filtered_%s_eeg_value.npy" % signal)
+        filtered_eeg_value = np.fromfile("data/filtered_%s_eeg_value.npy" % signal)
+        averaged_psd_freqs, averaged_psd_value = get_averaged_psd_window(filtered_eeg_time, filtered_eeg_value, 1024.0, [0.5, 80], 2048*8, 2048)
+
+        plt.plot(averaged_psd_freqs, averaged_psd_value, label=signal)
+
+    plt.xlabel("Frequency (Hz)")
+    plt.legend()
+    plt.show()
 
 test_c()
