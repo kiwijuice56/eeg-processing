@@ -54,15 +54,18 @@ def eeg_from_json_to_npy(file_name, new_file_name, signal_name, channel=1, old_f
     interp_raw_value.tofile(new_file_name % "value")
 
     if plot:
-        plt.plot(interp_raw_time, interp_raw_value)
+        plt.plot(interp_raw_time, interp_raw_value, label=file_name)
 
 
-eeg_from_json_to_npy("data/test_eeg_and_full_psd.json", "data/alpha_2_%s.npy", "alpha_absolute", channel=1, plot=False)
-eeg_from_json_to_npy("data/test_eeg_and_full_psd.json", "data/beta_2_%s.npy", "beta_absolute", channel=1, plot=False)
-eeg_from_json_to_npy("data/test_eeg_and_full_psd.json", "data/gamma_2_%s.npy", "gamma_absolute", channel=1, plot=False)
-eeg_from_json_to_npy("data/test_eeg_and_full_psd.json", "data/theta_2_%s.npy", "theta_absolute", channel=1, plot=False)
-eeg_from_json_to_npy("data/test_eeg_and_full_psd.json", "data/delta_2_%s.npy", "delta_absolute", channel=1, plot=False)
+for trial in ["pink_noise_test_1", "binaural_theta_test_1"]:
+    source = "data/%s.json" % trial
+    eeg_from_json_to_npy(source, "data/" + trial + "_alpha_%s.npy", "alpha_absolute", channel=1, plot=False)
+    eeg_from_json_to_npy(source, "data/" + trial + "_beta_%s.npy", "beta_absolute", channel=1, plot=False)
+    eeg_from_json_to_npy(source, "data/" + trial + "_gamma_%s.npy", "gamma_absolute", channel=1, plot=False)
+    eeg_from_json_to_npy(source, "data/" + trial + "_theta_%s.npy", "theta_absolute", channel=1, plot=True)
+    eeg_from_json_to_npy(source, "data/" + trial + "_delta_%s.npy", "delta_absolute", channel=1, plot=False)
 
-eeg_from_json_to_npy("data/test_eeg_and_full_psd.json", "data/eeg_2_%s.npy", "eeg", channel=1, old_frequency=256, new_frequency=1024, plot=True)
+    eeg_from_json_to_npy(source, "data/" + trial + "_eeg_%s.npy", "eeg", channel=1, old_frequency=256, new_frequency=1024, plot=False)
 
+plt.legend()
 plt.show()
