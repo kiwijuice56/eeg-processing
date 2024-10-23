@@ -150,4 +150,18 @@ def test_c():
     plt.legend()
     plt.show()
 
-test_c()
+
+def test_d():
+    for signal in ["pink_noise_test_1"]:
+        filtered_eeg_value = np.fromfile("data/filtered_%s_eeg_value.npy" % signal)
+        plt.specgram(filtered_eeg_value, Fs=256, cmap="magma")
+        plt.xlabel("time (s)")
+        plt.title("pink_noise_test")
+        plt.ylabel("frequency (Hz)")
+        ax = plt.gca()
+        ax.set_ylim([0, 60])
+
+
+    plt.show()
+
+test_d()
