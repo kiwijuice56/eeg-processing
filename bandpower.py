@@ -152,11 +152,11 @@ def test_c():
 
 
 def test_d():
-    for signal in ["pink_noise_test_1"]:
+    for signal in ["binaural_theta_test_1"]:
         filtered_eeg_value = np.fromfile("data/filtered_%s_eeg_value.npy" % signal)
         plt.specgram(filtered_eeg_value, Fs=256, cmap="magma")
         plt.xlabel("time (s)")
-        plt.title("pink_noise_test")
+        plt.title(signal)
         plt.ylabel("frequency (Hz)")
         ax = plt.gca()
         ax.set_ylim([0, 60])

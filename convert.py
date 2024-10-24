@@ -29,7 +29,7 @@ def interpolate_signal(x, y, old_frequency=-1, new_frequency=-1):
     return new_x, new_y
 
 
-def eeg_from_json_to_npy(file_name, new_file_name, signal_name, channel=1, old_frequency=-1, new_frequency=-1, plot=False):
+def eeg_from_json_to_npy(file_name, new_file_name, signal_name, channels=(1,), old_frequency=-1, new_frequency=-1, plot=False):
     # Open raw Muse data from JSON file, recorded using GD Muse
     raw_data = {}
     with open(file_name) as f:
@@ -42,12 +42,18 @@ def eeg_from_json_to_npy(file_name, new_file_name, signal_name, channel=1, old_f
 
         raw_data = json.loads(raw_json_data)
 
-    # Convert data into more usable form
+    # Timestamps of Bluetooth packets ...
+    # Not very useful except for the start and end
     raw_time = np.array(raw_data[signal_name]["time"])
-    raw_value = np.array(raw_data[signal_name]["value"])[:, channel]
+
+    # Average over the selected EEG channels
+    avg_value = []
+    for channel in channels:
+        avg_value.append(np.array(raw_data[signal_name]["value"])[:, channel])
+    avg_value = np.average(avg_value, axis=0)
 
     # Interpolate data with consistent spacing between samples
-    interp_raw_time, interp_raw_value = interpolate_signal(raw_time, raw_value, old_frequency=old_frequency, new_frequency=new_frequency)
+    interp_raw_time, interp_raw_value = interpolate_signal(raw_time, avg_value, old_frequency=old_frequency, new_frequency=new_frequency)
 
     # Save interpolated signals
     interp_raw_time.tofile(new_file_name % "time")
@@ -59,14 +65,15 @@ def eeg_from_json_to_npy(file_name, new_file_name, signal_name, channel=1, old_f
 
 for trial in ["pink_noise_test_1", "binaural_theta_test_1"]:
     source = "data/%s.json" % trial
-    channel = 0
-    eeg_from_json_to_npy(source, "data/" + trial + "_alpha_%s.npy", "alpha_absolute", channel=channel, plot=True)
-    eeg_from_json_to_npy(source, "data/" + trial + "_beta_%s.npy", "beta_absolute", channel=channel, plot=False)
-    eeg_from_json_to_npy(source, "data/" + trial + "_gamma_%s.npy", "gamma_absolute", channel=channel, plot=False)
-    eeg_from_json_to_npy(source, "data/" + trial + "_theta_%s.npy", "theta_absolute", channel=channel, plot=False)
-    eeg_from_json_to_npy(source, "data/" + trial + "_delta_%s.npy", "delta_absolute", channel=channel, plot=False)
+    channels = (0,) # Left ear
 
-    eeg_from_json_to_npy(source, "data/" + trial + "_eeg_%s.npy", "eeg", channel=channel, old_frequency=256, new_frequency=256, plot=False)
+    eeg_from_json_to_npy(source, "data/" + trial + "_alpha_%s.npy", "alpha_absolute", channels, plot=False)
+    eeg_from_json_to_npy(source, "data/" + trial + "_beta_%s.npy", "beta_absolute", channels, plot=False)
+    eeg_from_json_to_npy(source, "data/" + trial + "_gamma_%s.npy", "gamma_absolute", channels, plot=True)
+    eeg_from_json_to_npy(source, "data/" + trial + "_theta_%s.npy", "theta_absolute", channels, plot=False)
+    eeg_from_json_to_npy(source, "data/" + trial + "_delta_%s.npy", "delta_absolute", channels, plot=False)
+
+    eeg_from_json_to_npy(source, "data/" + trial + "_eeg_%s.npy", "eeg", channels, plot=False)
 
 plt.legend()
 plt.show()

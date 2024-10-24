@@ -13,6 +13,7 @@ for trial in ["pink_noise_test_1_eeg", "binaural_theta_test_1_eeg"]:
     # Save filtered signal
     filtered_eeg_value.tofile("data/filtered_%s_value.npy" % trial)
 
+    # Plot a small section
     plt.plot(raw_eeg_time[0:1024], raw_eeg_value[0:1024])
     plt.plot(raw_eeg_time[0:1024], filtered_eeg_value[0:1024])
 
