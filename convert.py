@@ -60,20 +60,22 @@ def eeg_from_json_to_npy(file_name, new_file_name, signal_name, channels=(1,), o
     interp_raw_value.tofile(new_file_name % "value")
 
     if plot:
-        plt.plot(interp_raw_time, interp_raw_value, label=file_name)
+        plt.plot(interp_raw_time, interp_raw_value, label=signal_name)
 
 
-for trial in ["pink_noise_test_1", "binaural_theta_test_1"]:
+for trial in ["eye_opening_test_1"]:
     source = "data/%s.json" % trial
-    channels = (0,) # Left ear
+    channels = (1,) # Left ear
 
-    eeg_from_json_to_npy(source, "data/" + trial + "_alpha_%s.npy", "alpha_absolute", channels, plot=False)
-    eeg_from_json_to_npy(source, "data/" + trial + "_beta_%s.npy", "beta_absolute", channels, plot=False)
+    eeg_from_json_to_npy(source, "data/" + trial + "_alpha_%s.npy", "alpha_absolute", channels, plot=True)
+    eeg_from_json_to_npy(source, "data/" + trial + "_beta_%s.npy", "beta_absolute", channels, plot=True)
     eeg_from_json_to_npy(source, "data/" + trial + "_gamma_%s.npy", "gamma_absolute", channels, plot=True)
-    eeg_from_json_to_npy(source, "data/" + trial + "_theta_%s.npy", "theta_absolute", channels, plot=False)
-    eeg_from_json_to_npy(source, "data/" + trial + "_delta_%s.npy", "delta_absolute", channels, plot=False)
+    eeg_from_json_to_npy(source, "data/" + trial + "_theta_%s.npy", "theta_absolute", channels, plot=True)
+    eeg_from_json_to_npy(source, "data/" + trial + "_delta_%s.npy", "delta_absolute", channels, plot=True)
 
     eeg_from_json_to_npy(source, "data/" + trial + "_eeg_%s.npy", "eeg", channels, plot=False)
 
+    plt.xlabel("time (s)")
+    plt.title("bandpower signals over time (eye opening test)")
 plt.legend()
 plt.show()

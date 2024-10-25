@@ -151,18 +151,20 @@ def test_c():
     plt.show()
 
 
+# Plots the spectrogram of a list of signals
 def test_d():
-    for signal in ["pink_noise_test_1"]:
-        filtered_eeg_value = np.fromfile("data/filtered_%s_eeg_value.npy" % signal)
-        spec, freqs, bins, im = plt.specgram(filtered_eeg_value, Fs=256, cmap="magma")
-        plt.xlabel("time (s)")
+    vmin, vmax = -20, 10 # The dB range of the y-axis
+
+    for signal in ["filtered_eye_opening_test_1"]:
+        filtered_eeg_value = np.fromfile("data/%s_eeg_value.npy" % signal)
+        _, _, _, im = plt.specgram(filtered_eeg_value, Fs=256, vmin=vmin, vmax=vmax)
         plt.title(signal)
+        plt.xlabel("time (s)")
         plt.ylabel("frequency (Hz)")
         ax = plt.gca()
         ax.set_ylim([5, 60])
         cbar = plt.colorbar(im, ax=ax)
-        cbar.set_label('Intensity (dB)')
-
+        cbar.set_label("intensity (dB)")
 
     plt.show()
 

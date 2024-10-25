@@ -3,7 +3,7 @@ import mne
 
 import matplotlib.pyplot as plt
 
-for trial in ["pink_noise_test_1_eeg", "binaural_theta_test_1_eeg"]:
+for trial in ["eye_opening_test_1_eeg"]:
     raw_eeg_time = np.fromfile("data/%s_time.npy" % trial)
     raw_eeg_value = np.fromfile("data/%s_value.npy" % trial)
 
