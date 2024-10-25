@@ -65,17 +65,17 @@ def eeg_from_json_to_npy(file_name, new_file_name, signal_name, channels=(1,), o
 
 for trial in ["eye_opening_test_1"]:
     source = "data/%s.json" % trial
-    channels = (1,) # Left ear
+    channels = (3,) # Left ear
 
     eeg_from_json_to_npy(source, "data/" + trial + "_alpha_%s.npy", "alpha_absolute", channels, plot=True)
-    eeg_from_json_to_npy(source, "data/" + trial + "_beta_%s.npy", "beta_absolute", channels, plot=True)
-    eeg_from_json_to_npy(source, "data/" + trial + "_gamma_%s.npy", "gamma_absolute", channels, plot=True)
-    eeg_from_json_to_npy(source, "data/" + trial + "_theta_%s.npy", "theta_absolute", channels, plot=True)
+    eeg_from_json_to_npy(source, "data/" + trial + "_beta_%s.npy", "beta_absolute", channels, plot=False)
+    eeg_from_json_to_npy(source, "data/" + trial + "_gamma_%s.npy", "gamma_absolute", channels, plot=False)
+    eeg_from_json_to_npy(source, "data/" + trial + "_theta_%s.npy", "theta_absolute", channels, plot=False)
     eeg_from_json_to_npy(source, "data/" + trial + "_delta_%s.npy", "delta_absolute", channels, plot=True)
 
     eeg_from_json_to_npy(source, "data/" + trial + "_eeg_%s.npy", "eeg", channels, plot=False)
 
     plt.xlabel("time (s)")
-    plt.title("bandpower signals over time (eye opening test)")
+    plt.title("eeg signal over time (eye opening test)")
 plt.legend()
 plt.show()

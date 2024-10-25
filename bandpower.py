@@ -153,7 +153,7 @@ def test_c():
 
 # Plots the spectrogram of a list of signals
 def test_d():
-    vmin, vmax = -20, 10 # The dB range of the y-axis
+    vmin, vmax = -7, 15 # The dB range of the y-axis
 
     for signal in ["filtered_eye_opening_test_1"]:
         filtered_eeg_value = np.fromfile("data/%s_eeg_value.npy" % signal)
@@ -162,7 +162,7 @@ def test_d():
         plt.xlabel("time (s)")
         plt.ylabel("frequency (Hz)")
         ax = plt.gca()
-        ax.set_ylim([5, 60])
+        ax.set_ylim([2, 100])
         cbar = plt.colorbar(im, ax=ax)
         cbar.set_label("intensity (dB)")
 
