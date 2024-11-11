@@ -153,10 +153,10 @@ def test_c():
 
 # Plots the spectrogram of a list of signals
 def test_d():
-    vmin, vmax = -7, 15 # The dB range of the y-axis
+    vmin, vmax = -15, 15 # The dB range of the y-axis
 
-    for signal in ["filtered_eye_opening_test_1"]:
-        filtered_eeg_value = np.fromfile("data/%s_eeg_value.npy" % signal)
+    for signal in ["sleep_test_11_1"]:
+        filtered_eeg_value = np.fromfile("data/filtered_%s_eeg_value.npy" % signal)
         _, _, _, im = plt.specgram(filtered_eeg_value, Fs=256, vmin=vmin, vmax=vmax)
         plt.title(signal)
         plt.xlabel("time (s)")

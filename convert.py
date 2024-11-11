@@ -29,9 +29,10 @@ def interpolate_signal(x, y, old_frequency=-1, new_frequency=-1):
     return new_x, new_y
 
 
-def eeg_from_json_to_npy(file_name, new_file_name, signal_name, channels=(1,), old_frequency=-1, new_frequency=-1, plot=False):
+# Loads a JSON file and returns the data it contains
+def from_json_to_py(file_name):
     # Open raw Muse data from JSON file, recorded using GD Muse
-    raw_data = {}
+    raw_data = []
     with open(file_name) as f:
         raw_json_data = str(f.readline())
 
@@ -39,14 +40,17 @@ def eeg_from_json_to_npy(file_name, new_file_name, signal_name, channels=(1,), o
         # Note that 'nan' values represent dropped packets that should be linearly
         # interpolated! For now, this script assumes the connection is stable
         raw_json_data = re.sub(r'\bnan\b', 'NaN', raw_json_data)
-
         raw_data = json.loads(raw_json_data)
+    return raw_data
 
+
+# Takes a signal with multiple channels (EEG, PPG), averages the given channels, resamples it, then converts it to a .npy file
+def process_signal(raw_data, new_file_name, signal_name, channels=(1,), old_frequency=-1, new_frequency=-1, plot=False):
     # Timestamps of Bluetooth packets ...
     # Not very useful except for the start and end
     raw_time = np.array(raw_data[signal_name]["time"])
 
-    # Average over the selected EEG channels
+    # Average over the selected channels
     avg_value = []
     for channel in channels:
         avg_value.append(np.array(raw_data[signal_name]["value"])[:, channel])
@@ -63,19 +67,26 @@ def eeg_from_json_to_npy(file_name, new_file_name, signal_name, channels=(1,), o
         plt.plot(interp_raw_time, interp_raw_value, label=signal_name)
 
 
-for trial in ["eye_opening_test_1"]:
+eeg_channels = (0,) # 0 corresponds to left ear electrode... See Muse SDK documentation for different channel mappings
+
+for trial in ["sleep_10_30"]:
     source = "data/%s.json" % trial
-    channels = (3,) # Left ear
+    raw_data = from_json_to_py(source)
 
-    eeg_from_json_to_npy(source, "data/" + trial + "_alpha_%s.npy", "alpha_absolute", channels, plot=True)
-    eeg_from_json_to_npy(source, "data/" + trial + "_beta_%s.npy", "beta_absolute", channels, plot=False)
-    eeg_from_json_to_npy(source, "data/" + trial + "_gamma_%s.npy", "gamma_absolute", channels, plot=False)
-    eeg_from_json_to_npy(source, "data/" + trial + "_theta_%s.npy", "theta_absolute", channels, plot=False)
-    eeg_from_json_to_npy(source, "data/" + trial + "_delta_%s.npy", "delta_absolute", channels, plot=True)
+    process_signal(raw_data, "data/" + trial + "_alpha_%s.npy", "alpha_absolute", eeg_channels, plot=False)
+    process_signal(raw_data, "data/" + trial + "_beta_%s.npy", "beta_absolute", eeg_channels, plot=False)
+    process_signal(raw_data, "data/" + trial + "_gamma_%s.npy", "gamma_absolute", eeg_channels, plot=False)
+    process_signal(raw_data, "data/" + trial + "_theta_%s.npy", "theta_absolute", eeg_channels, plot=False)
+    process_signal(raw_data, "data/" + trial + "_delta_%s.npy", "delta_absolute", eeg_channels, plot=False)
 
-    eeg_from_json_to_npy(source, "data/" + trial + "_eeg_%s.npy", "eeg", channels, plot=False)
+    process_signal(raw_data, "data/" + trial + "_eeg_%s.npy", "eeg", eeg_channels, plot=False)
 
-    plt.xlabel("time (s)")
-    plt.title("eeg signal over time (eye opening test)")
+    # Convert each channel of the PPG signal individually
+    process_signal(raw_data, "data/" + trial + "_ppg_irh16_%s.npy", "ppg", (0,), plot=False)
+    process_signal(raw_data, "data/" + trial + "_ppg_ir_%s.npy", "ppg", (1,), plot=False)
+    process_signal(raw_data, "data/" + trial + "_ppg_red_%s.npy", "ppg", (2,), plot=False)
+
+plt.xlabel("time (s)")
+plt.title("...")
 plt.legend()
 plt.show()
