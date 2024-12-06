@@ -6,6 +6,7 @@ import matplotlib.pyplot as plt
 # Calculates bandpower of different frequencies in EEG data
 
 
+# Get the PSD of given a small window of EEG data
 def get_psd_window(data, sampling_frequency, band):
     fft = np.fft.fft(data)
     psd = np.square(np.abs(fft))
@@ -21,6 +22,8 @@ def get_psd_window(data, sampling_frequency, band):
     return psd_window_freq, psd_window_val
 
 
+# Given an entire EEG trial, average the PSD over a sliding window
+# Not very useful for long trials -- removes the time dimension of the data
 def get_averaged_psd_window(eeg_time, eeg_value, sampling_frequency, band, window_size=2048, window_gap=512):
     averaged_psd_val = []
     averaged_psd_freq = []
@@ -49,6 +52,7 @@ def get_averaged_psd_window(eeg_time, eeg_value, sampling_frequency, band, windo
     return averaged_psd_freq, [x / window_count for x in averaged_psd_val]
 
 
+# Get the FFT of a small window of EEG data
 def get_fft_window(data, sampling_frequency, band):
     fft = np.fft.fft(data)
     fft_window_freq = []
@@ -81,7 +85,7 @@ def calculate_bandpower(data, sampling_frequency, band, plot=False):
     return np.log(bandpower)
 
 
-# Uses a window to calculate the bandpower of an EEG signal over time
+# Use sliding window to calculate the bandpower of an EEG signal over time
 def calculate_bandpower_signal(eeg_time, eeg_value, band, sampling_frequency, window_size=2048, window_gap=512, plot=True):
     signal_time = []
     signal_value = []
@@ -138,6 +142,7 @@ def test_b():
 
 
 # Calculate the PSD for windows in time, averaging them up
+# Again, not very useful
 def test_c():
     for signal in ["pink_noise_test_1", "binaural_theta_test_1"]:
         filtered_eeg_time = np.fromfile("data/filtered_%s_eeg_value.npy" % signal)

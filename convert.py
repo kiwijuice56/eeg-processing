@@ -67,26 +67,30 @@ def process_signal(raw_data, new_file_name, signal_name, channels=(1,), old_freq
         plt.plot(interp_raw_time, interp_raw_value, label=signal_name)
 
 
-eeg_channels = (0,) # 0 corresponds to left ear electrode... See Muse SDK documentation for different channel mappings
+# Convert and resample Muse recordings
+def convert_trial_data():
+    eeg_channels = (0,) # 0 corresponds to left ear electrode... See Muse SDK documentation for different channel mappings
 
-for trial in ["sleep_10_30"]:
-    source = "data/%s.json" % trial
-    raw_data = from_json_to_py(source)
+    for trial in ["sleep_10_30"]:
+        source = "data/%s.json" % trial
+        raw_data = from_json_to_py(source)
 
-    process_signal(raw_data, "data/" + trial + "_alpha_%s.npy", "alpha_absolute", eeg_channels, plot=False)
-    process_signal(raw_data, "data/" + trial + "_beta_%s.npy", "beta_absolute", eeg_channels, plot=False)
-    process_signal(raw_data, "data/" + trial + "_gamma_%s.npy", "gamma_absolute", eeg_channels, plot=False)
-    process_signal(raw_data, "data/" + trial + "_theta_%s.npy", "theta_absolute", eeg_channels, plot=False)
-    process_signal(raw_data, "data/" + trial + "_delta_%s.npy", "delta_absolute", eeg_channels, plot=False)
+        process_signal(raw_data, "data/" + trial + "_alpha_%s.npy", "alpha_absolute", eeg_channels, plot=True)
+        process_signal(raw_data, "data/" + trial + "_beta_%s.npy", "beta_absolute", eeg_channels, plot=False)
+        process_signal(raw_data, "data/" + trial + "_gamma_%s.npy", "gamma_absolute", eeg_channels, plot=False)
+        process_signal(raw_data, "data/" + trial + "_theta_%s.npy", "theta_absolute", eeg_channels, plot=False)
+        process_signal(raw_data, "data/" + trial + "_delta_%s.npy", "delta_absolute", eeg_channels, plot=False)
 
-    process_signal(raw_data, "data/" + trial + "_eeg_%s.npy", "eeg", eeg_channels, plot=False)
+        process_signal(raw_data, "data/" + trial + "_eeg_%s.npy", "eeg", eeg_channels, plot=False)
 
-    # Convert each channel of the PPG signal individually
-    process_signal(raw_data, "data/" + trial + "_ppg_irh16_%s.npy", "ppg", (0,), plot=False)
-    process_signal(raw_data, "data/" + trial + "_ppg_ir_%s.npy", "ppg", (1,), plot=False)
-    process_signal(raw_data, "data/" + trial + "_ppg_red_%s.npy", "ppg", (2,), plot=False)
+        # Convert each channel of the PPG signal individually
+        process_signal(raw_data, "data/" + trial + "_ppg_irh16_%s.npy", "ppg", (0,), plot=False)
+        process_signal(raw_data, "data/" + trial + "_ppg_ir_%s.npy", "ppg", (1,), plot=False)
+        process_signal(raw_data, "data/" + trial + "_ppg_red_%s.npy", "ppg", (2,), plot=False)
 
-plt.xlabel("time (s)")
-plt.title("...")
-plt.legend()
-plt.show()
+    plt.xlabel("time (s)")
+    plt.title("alpha signal")
+    plt.legend()
+    plt.show()
+
+convert_trial_data()
